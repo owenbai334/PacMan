@@ -6,6 +6,8 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
 #include "PacDot.h"
+#include "Kismet/GameplayStatics.h"
+#include "PacManGameModeBase.h"
 
 // Sets default values
 AMyPlayer::AMyPlayer()
@@ -23,8 +25,41 @@ AMyPlayer::AMyPlayer()
 void AMyPlayer::BeginPlay()
 {
 	Super::BeginPlay();
+	StartLocation = GetActorLocation();
+	Lifes = 3;
+	GameModeRef = Cast<APacManGameModeBase>(UGameplayStatics::GetGameMode(this));
 	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &AMyPlayer::OnPacmanBeginOverlay);
 	
+}
+
+void AMyPlayer::Injured()
+{
+
+}
+
+void AMyPlayer::Resetting()
+{
+
+}
+
+void AMyPlayer::SetMovement(bool bCanMove)
+{
+
+}
+
+void AMyPlayer::StartGame()
+{
+	GameModeRef->StartGame();
+}
+
+void AMyPlayer::PauseGame()
+{
+	GameModeRef->PauseGame();
+}
+
+void AMyPlayer::RestartGame()
+{
+	GameModeRef->RestartGame();
 }
 
 // Called every frame
@@ -38,6 +73,10 @@ void AMyPlayer::Tick(float DeltaTime)
 void AMyPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+	PlayerInputComponent->BindAction("StartGame", IE_Pressed, this, &AMyPlayer::StartGame);
+	PlayerInputComponent->BindAction("PauseGame", IE_Pressed, this, &AMyPlayer::PauseGame);
+	PlayerInputComponent->BindAction("RestartGame", IE_Pressed, this, &AMyPlayer::RestartGame);
 
 	PlayerInputComponent->BindAxis("MoveX", this, &AMyPlayer::MoveX);
 	PlayerInputComponent->BindAxis("MoveY", this, &AMyPlayer::MoveY);
