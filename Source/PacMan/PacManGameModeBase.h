@@ -31,6 +31,8 @@ public:
 	void PauseGame();
 	void RestartGame();
 
+	void SetEnemiesVulnerable();
+
 	int GetPacdotNum() const;
 	void SetPacdotNum(int value);
 

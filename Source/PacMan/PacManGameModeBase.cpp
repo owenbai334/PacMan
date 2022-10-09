@@ -4,6 +4,7 @@
 #include "PacManGameModeBase.h"
 #include "PacDot.h"
 #include "Enemy.h"
+#include "MyPlayer.h"
 #include "Engine/Public/EngineUtils.h"
 #include "EnemyController.h"
 
@@ -33,15 +34,27 @@ void APacManGameModeBase::SetCurrentState(EGameState value)
 
 	switch (CurrentState)
 	{
-	case EGameState::EMenu:
-		break;
 	case EGameState::EPlay:
-		break;
-	case EGameState::EPause:
+		for (auto Iter(Enemies.CreateIterator()); Iter; ++Iter)
+		{
+			(*Iter)->SetMovement(true);
+		}
+		Cast<AMyPlayer>(GetWorld()->GetFirstPlayerController()->GetPawn())->SetMovement(true);
 		break;
 	case EGameState::EWin:
+		for (auto Iter(Enemies.CreateIterator()); Iter; ++Iter)
+		{
+			(*Iter)->Destroy();
+		}
 		break;
+	case EGameState::EPause:
 	case EGameState::ELose:
+		for (auto Iter(Enemies.CreateIterator()); Iter; ++Iter)
+		{
+			(*Iter)->SetMovement(false);
+			GetWorldTimerManager().ClearAllTimersForObject(*Iter);
+		}
+		Cast<AMyPlayer>(GetWorld()->GetFirstPlayerController()->GetPawn())->SetMovement(false);
 		break;
 	default:
 		break;
@@ -73,10 +86,25 @@ void APacManGameModeBase::StartGame()
 
 void APacManGameModeBase::PauseGame()
 {
-
+	if (GetCurrentState() == EGameState::EPlay)
+	{
+		SetCurrentState(EGameState::EPause);
+	}
+	else if (GetCurrentState() == EGameState::EPause)
+	{
+		SetCurrentState(EGameState::EPlay);
+	}
 }
 
 void APacManGameModeBase::RestartGame()
 {
+	GetWorld()->GetFirstPlayerController()->ConsoleCommand(TEXT("RestartLevel"));
+}
 
+void APacManGameModeBase::SetEnemiesVulnerable()
+{
+	for (auto Iter(Enemies.CreateIterator()); Iter; ++Iter)
+	{
+		(*Iter)->SetVulnerable();
+	}
 }

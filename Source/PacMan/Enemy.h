@@ -18,6 +18,9 @@ public:
 	bool bIsDead;
 	bool bIsVulnerable;
 
+	FTimerHandle DeadTimerHandle;
+	FTimerHandle VulnerableTimerHandle;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float DeadTime;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -44,8 +47,8 @@ public:
 	UFUNCTION()
 	void OnEnemyBeginOverlay(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
-	void SetVulnerable();
-	void SetDead();
+	void SetVulnerable(bool bRestartTimer = false,float Timer = 0.0f);
+	void SetDead(bool bRestartTimer = false, float Timer = 0.0f);
 	void SetNormal();
 	void SetMovement(bool bCanMove);
 

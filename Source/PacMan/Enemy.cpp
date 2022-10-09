@@ -6,6 +6,7 @@
 #include "Components/CapsuleComponent.h"
 #include "MyPlayer.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Engine/Public/TimerManager.h"
 
 // Sets default values
 AEnemy::AEnemy()
@@ -71,19 +72,52 @@ void AEnemy::OnEnemyBeginOverlay(UPrimitiveComponent* OverlappedComponent, AActo
 	}
 }
 
-void AEnemy::SetVulnerable()
+void AEnemy::SetVulnerable(bool bRestartTimer, float Timer)
 {
-
+	if (bRestartTimer)
+	{
+		GetWorldTimerManager().SetTimer(VulnerableTimerHandle, this, &AEnemy::SetNormal, Timer, false);
+	}
+	else
+	{
+		GetWorldTimerManager().SetTimer(VulnerableTimerHandle, this, &AEnemy::SetNormal, VulnerableTime, false);
+	}
+	if (bIsVulnerable)
+	{
+		return;
+	}
+	bIsVulnerable = true;
+	SetMovement(true);
 }
 
-void AEnemy::SetDead()
+void AEnemy::SetDead(bool bRestartTimer, float Timer)
 {
+	if (bRestartTimer&&bIsDead)
+	{
+		GetWorldTimerManager().SetTimer(DeadTimerHandle, this, &AEnemy::SetNormal, Timer, false);
+		return;
+	}
+	if (bIsDead)
+	{
+		return;
+	}
+	bIsDead = true;
+	SetMovement(true);
+	SetActorLocation(StartLocation);
+	GetWorldTimerManager().ClearTimer(VulnerableTimerHandle);
+	GetWorldTimerManager().SetTimer(DeadTimerHandle, this, &AEnemy::SetNormal, DeadTime, false);
 
 }
 
 void AEnemy::SetNormal()
 {
+	GetWorldTimerManager().ClearTimer(DeadTimerHandle);
+	GetWorldTimerManager().ClearTimer(VulnerableTimerHandle);
+	
+	bIsDead = false;
+	bIsVulnerable = false;
 
+	SetMovement(true);
 }
 
 void AEnemy::SetMovement(bool bCanMove)

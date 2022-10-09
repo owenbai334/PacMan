@@ -49,13 +49,13 @@ void AMyPlayer::Injured()
 	else
 	{
 		SetActorLocation(StartLocation);
-		GetWorld()->GetTimerManager().SetTimer(ResettingTimerHandle, this, &AMyPlayer::Resetting, InvincibleTime, false);
+		GetWorldTimerManager().SetTimer(ResettingTimerHandle, this, &AMyPlayer::Resetting, InvincibleTime, false);
 	}
 }
 
 void AMyPlayer::Resetting()
 {
-	GetWorld()->GetTimerManager().ClearTimer(ResettingTimerHandle);
+	GetWorldTimerManager().ClearTimer(ResettingTimerHandle);
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("Pawn"));
 }
 
@@ -109,42 +109,57 @@ void AMyPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 void AMyPlayer::MoveX(float value)
 {
-	Velocity.X = value;
-	Velocity.Y = 0;
-
-	if (value > 0)
+	if (GameModeRef->GetCurrentState() == EGameState::EPlay)
 	{
-		SetActorRotation(FRotator(0,0,0));
-	}
-	else if (value < 0)
-	{
-		SetActorRotation(FRotator(0,-180,0));
-	}
+		Velocity.X = value;
+		Velocity.Y = 0;
 
-	AddMovementInput(Velocity);
+		if (value > 0)
+		{
+			SetActorRotation(FRotator(0, 0, 0));
+		}
+		else if (value < 0)
+		{
+			SetActorRotation(FRotator(0, -180, 0));
+		}
+
+		AddMovementInput(Velocity);
+	}
 }
 
 void AMyPlayer::MoveY(float value)
 {
-	Velocity.X = 0;
-	Velocity.Y = value;
+	if (GameModeRef->GetCurrentState() == EGameState::EPlay)
+	{
+		Velocity.X = 0;
+		Velocity.Y = value;
 
-	if (value > 0)
-	{
-		SetActorRotation(FRotator(0,90,0));
-	}
-	else if(value < 0)
-	{
-		SetActorRotation(FRotator(0,-90,0));
-	}
-	AddMovementInput(Velocity);
+		if (value > 0)
+		{
+			SetActorRotation(FRotator(0, 90, 0));
+		}
+		else if (value < 0)
+		{
+			SetActorRotation(FRotator(0, -90, 0));
+		}
+		AddMovementInput(Velocity);
+	}	
 }
 
 void AMyPlayer::OnPacmanBeginOverlay(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (OtherActor->IsA(APacDot::StaticClass()))
+	if (GameModeRef->GetCurrentState() == EGameState::EPlay)
 	{
-		OtherActor->Destroy();
+		if (OtherActor->IsA(APacDot::StaticClass()))
+		{
+			APacDot* CurrentDot = Cast<APacDot>(OtherActor);
+			if (CurrentDot->BIsSuperPacDot)
+			{
+				GameModeRef->SetEnemiesVulnerable();
+			}
+			OtherActor->Destroy();
+			GameModeRef->SetPacdotNum(GameModeRef->GetPacdotNum() - 1);
+		}
 	}
 }
 
