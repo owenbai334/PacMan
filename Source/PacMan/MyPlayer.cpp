@@ -8,6 +8,8 @@
 #include "PacDot.h"
 #include "Kismet/GameplayStatics.h"
 #include "PacManGameModeBase.h"
+#include "Engine/Public/TimerManager.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
 AMyPlayer::AMyPlayer()
@@ -27,24 +29,46 @@ void AMyPlayer::BeginPlay()
 	Super::BeginPlay();
 	StartLocation = GetActorLocation();
 	Lifes = 3;
+	NormalSpeed = 600.0f;
+	InvincibleTime = 3.0f;
 	GameModeRef = Cast<APacManGameModeBase>(UGameplayStatics::GetGameMode(this));
 	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &AMyPlayer::OnPacmanBeginOverlay);
+	SetMovement(true);
 	
 }
 
 void AMyPlayer::Injured()
 {
-
+	GetCapsuleComponent()->SetCollisionProfileName(TEXT("Invincible"));
+	Lifes--;
+	UE_LOG(LogTemp, Warning, TEXT("%d"), Lifes);
+	if (Lifes == 0)
+	{
+		GameModeRef->SetCurrentState(EGameState::ELose);
+	}
+	else
+	{
+		SetActorLocation(StartLocation);
+		GetWorld()->GetTimerManager().SetTimer(ResettingTimerHandle, this, &AMyPlayer::Resetting, InvincibleTime, false);
+	}
 }
 
 void AMyPlayer::Resetting()
 {
-
+	GetWorld()->GetTimerManager().ClearTimer(ResettingTimerHandle);
+	GetCapsuleComponent()->SetCollisionProfileName(TEXT("Pawn"));
 }
 
 void AMyPlayer::SetMovement(bool bCanMove)
 {
-
+	if (bCanMove)
+	{
+		GetCharacterMovement()->MaxWalkSpeed = NormalSpeed;
+	}
+	else
+	{
+		GetCharacterMovement()->MaxWalkSpeed = 0;
+	}
 }
 
 void AMyPlayer::StartGame()

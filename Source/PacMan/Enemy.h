@@ -15,8 +15,21 @@ public:
 	// Sets default values for this character's properties
 	AEnemy();
 
+	bool bIsDead;
+	bool bIsVulnerable;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float DeadTime;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float VulnerableTime;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	class UStaticMeshComponent* EnemyDisplayMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float NormalSpeed;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float VulnerableSpeed;
 
 protected:
 	// Called when the game starts or when spawned

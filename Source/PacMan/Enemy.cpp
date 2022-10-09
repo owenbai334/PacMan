@@ -5,6 +5,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "MyPlayer.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
 AEnemy::AEnemy()
@@ -21,8 +22,19 @@ AEnemy::AEnemy()
 void AEnemy::BeginPlay()
 {
 	Super::BeginPlay();
+
+	NormalSpeed = 300.0f;
+	VulnerableSpeed = 100.0f;
+
+	bIsDead = false;
+	bIsVulnerable = false;
+
+	DeadTime = 5.0f;
+	VulnerableTime = 3.0f;
+
 	StartLocation = GetActorLocation();
 	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &AEnemy::OnEnemyBeginOverlay);
+	SetMovement(true);
 }
 
 // Called every frame
@@ -43,7 +55,19 @@ void AEnemy::OnEnemyBeginOverlay(UPrimitiveComponent* OverlappedComponent, AActo
 {
 	if (OtherActor->IsA(AMyPlayer::StaticClass()))
 	{
-		
+		if (bIsDead)
+		{
+			return;
+		}
+
+		if (bIsVulnerable)
+		{
+			SetDead();
+		}
+		else
+		{
+			Cast<AMyPlayer>(OtherActor)->Injured();
+		}
 	}
 }
 
@@ -64,6 +88,24 @@ void AEnemy::SetNormal()
 
 void AEnemy::SetMovement(bool bCanMove)
 {
-
+	if (bCanMove)
+	{
+		if (!bIsVulnerable && !bIsDead)
+		{
+			GetCharacterMovement()->MaxWalkSpeed = NormalSpeed;
+		}
+		if (bIsVulnerable && !bIsDead)
+		{
+			GetCharacterMovement()->MaxWalkSpeed = VulnerableSpeed;
+		}
+		if (bIsDead)
+		{
+			GetCharacterMovement()->MaxWalkSpeed = 0;
+		}
+	}
+	else
+	{
+		GetCharacterMovement()->MaxWalkSpeed = 0;
+	}
 }
 

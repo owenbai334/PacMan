@@ -21,6 +21,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int Lifes;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float NormalSpeed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float InvincibleTime;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -50,4 +56,5 @@ private:
 	FVector StartLocation;
 	FVector Velocity;
 	class APacManGameModeBase* GameModeRef;
+	FTimerHandle ResettingTimerHandle;
 };
