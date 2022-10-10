@@ -30,8 +30,11 @@ public:
 	void StartGame();
 	void PauseGame();
 	void RestartGame();
+	void EscapeGame();
 
 	void SetEnemiesVulnerable();
+	void RecordEnemiesTimer();
+	void RestoreEnemiesTimer();
 
 	int GetPacdotNum() const;
 	void SetPacdotNum(int value);
@@ -50,6 +53,7 @@ protected:
 
 private:
 	TArray<class AEnemy*> Enemies;
+	TArray<float> EnemiesTimerRemaining;
 	
 };
 

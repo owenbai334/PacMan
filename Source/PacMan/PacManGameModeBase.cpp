@@ -88,10 +88,12 @@ void APacManGameModeBase::PauseGame()
 {
 	if (GetCurrentState() == EGameState::EPlay)
 	{
+		RecordEnemiesTimer();
 		SetCurrentState(EGameState::EPause);
 	}
 	else if (GetCurrentState() == EGameState::EPause)
 	{
+		RestoreEnemiesTimer();
 		SetCurrentState(EGameState::EPlay);
 	}
 }
@@ -101,10 +103,53 @@ void APacManGameModeBase::RestartGame()
 	GetWorld()->GetFirstPlayerController()->ConsoleCommand(TEXT("RestartLevel"));
 }
 
+void APacManGameModeBase::EscapeGame()
+{
+	GetWorld()->GetFirstPlayerController()->ConsoleCommand(TEXT("Exit"));
+}
+
 void APacManGameModeBase::SetEnemiesVulnerable()
 {
 	for (auto Iter(Enemies.CreateIterator()); Iter; ++Iter)
 	{
 		(*Iter)->SetVulnerable();
+	}
+}
+
+void APacManGameModeBase::RecordEnemiesTimer()
+{
+	EnemiesTimerRemaining.Empty();
+
+	for (auto Iter(Enemies.CreateIterator()); Iter; ++Iter)
+	{
+		if ((*Iter)->bIsVulnerable == false && (*Iter)->bIsDead == false)
+		{
+			EnemiesTimerRemaining.Add(-1);
+		}
+		if ((*Iter)->bIsVulnerable == true && (*Iter)->bIsDead == false)
+		{
+			float VulnerableTimerRemaining = GetWorldTimerManager().GetTimerRemaining((*Iter)->VulnerableTimerHandle);
+			EnemiesTimerRemaining.Add(VulnerableTimerRemaining);
+		}
+		if ((*Iter)->bIsDead == true)
+		{
+			float DeadTimerRemaining = GetWorldTimerManager().GetTimerRemaining((*Iter)->DeadTimerHandle);
+			EnemiesTimerRemaining.Add(DeadTimerRemaining);
+		}
+	}
+}
+
+void APacManGameModeBase::RestoreEnemiesTimer()
+{
+	for (auto Iter(Enemies.CreateIterator()); Iter; ++Iter)
+	{
+		if ((*Iter)->bIsVulnerable == true && (*Iter)->bIsDead == false)
+		{
+			(*Iter)->SetVulnerable(true, EnemiesTimerRemaining[Iter.GetIndex()]);
+		}
+		if ((*Iter)->bIsDead == true)
+		{
+			(*Iter)->SetDead(true, EnemiesTimerRemaining[Iter.GetIndex()]);
+		}
 	}
 }

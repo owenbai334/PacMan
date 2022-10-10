@@ -40,6 +40,8 @@ public:
 	void StartGame();
 	void PauseGame();
 	void RestartGame();
+	void EscapeGame();
+
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 

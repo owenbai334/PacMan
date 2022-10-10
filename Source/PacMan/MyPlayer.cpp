@@ -86,6 +86,11 @@ void AMyPlayer::RestartGame()
 	GameModeRef->RestartGame();
 }
 
+void AMyPlayer::EscapeGame()
+{
+	GameModeRef->EscapeGame();
+}
+
 // Called every frame
 void AMyPlayer::Tick(float DeltaTime)
 {
@@ -101,6 +106,7 @@ void AMyPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	PlayerInputComponent->BindAction("StartGame", IE_Pressed, this, &AMyPlayer::StartGame);
 	PlayerInputComponent->BindAction("PauseGame", IE_Pressed, this, &AMyPlayer::PauseGame);
 	PlayerInputComponent->BindAction("RestartGame", IE_Pressed, this, &AMyPlayer::RestartGame);
+	PlayerInputComponent->BindAction("EscapeGame", IE_Pressed, this, &AMyPlayer::EscapeGame);
 
 	PlayerInputComponent->BindAxis("MoveX", this, &AMyPlayer::MoveX);
 	PlayerInputComponent->BindAxis("MoveY", this, &AMyPlayer::MoveY);
